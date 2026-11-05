@@ -1,0 +1,19 @@
+# Ambiente virtual e cache
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Segredos (se algum dia usarem chave de API)
+.env
+
+# Dados grandes (podem ser regenerados com src/coleta.py ou compartilhados por Drive)
+data/*.csv
+
+# Modelo treinado: descomente se ficar grande demais para o Git
+# models/*.keras
+
+# Editor / sistema
+.vscode/
+.idea/
+.DS_Store
