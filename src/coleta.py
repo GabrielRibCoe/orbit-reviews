@@ -7,25 +7,66 @@ Endpoints úteis (não precisam de chave):
 
 Cuidados: coloque uma pausa (time.sleep) entre chamadas e trate jogos sem reviews.
 """
+
 import pandas as pd
+import json
+import requests
 
 
 def buscar_jogo(nome: str) -> list[dict]:
-    """Busca jogos pelo nome.
 
-    Retorna uma lista de dicts, por exemplo:
-        [{"appid": 570, "nome": "Dota 2"}, ...]
-    Lista vazia se nada for encontrado.
-    """
-    raise NotImplementedError
+    try: 
+        timeout = 10
+        resp = requests.get(
+   
+            "https://store.steampowered.com/api/storesearch/",
+            params={"term": nome, "l": "english", "cc": "US"},
+    
+        )
+        resp.raise_for_status()
+    except requests.exceptions.RequestException as e:
+            print(f"Erro ao buscar jogo: {e}")
+            return []
+    
+    print(resp.status_code)
+    dados = resp.json()
+    print(dados)
+
+    resultado = []
+
+    for jogo in dados["items"]:
+        resultado.append({"ident": jogo["id"], "nome": jogo["name"]})
+    
+    return resultado
+
+entrada = {
+    "appid": "ident",
+    "filter": 1,                 # 1 = mais recentes primeiro
+    "languages": ["english"],    # atenção: agora é uma LISTA, e o nome é "languages"
+    "purchase_type": 1,          # 1 = todas as compras
+    "num_per_page": 5,
+    "cursor": "*",
+}
+
 
 
 def buscar_reviews(appid: int, n: int = 100, idioma: str = "english") -> list[str]:
-    """Baixa até `n` reviews recentes de um jogo (paginando com o cursor).
+    
+    entrada["appid"] = appid
+    resp = requests.get(
+        "https://api.steampowered.com/IUserReviewsService/GetAppReviews/v1/",
+        params={"input_json": json.dumps(entrada)},
+        timeout=10,
+)
+    print(resp.status_code)
+    print(resp.url)
+    dados = resp.json()
+    print(dados.keys())
+    print(dados["response"].keys())
 
-    Retorna apenas os textos das reviews.
-    """
-    raise NotImplementedError
+    reviews = dados["response"]["reviews"]
+    print(len(reviews))
+    print(reviews[0])
 
 
 def coletar_dataset(appids: list[int], n_por_jogo: int = 1000, idioma: str = "english") -> pd.DataFrame:
