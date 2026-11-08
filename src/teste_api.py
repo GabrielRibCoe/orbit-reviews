@@ -24,3 +24,4 @@ print(dados["response"].keys())
 reviews = dados["response"]["reviews"]
 print(len(reviews))
 print(reviews[0])
+print(dados.get("cursor"))
