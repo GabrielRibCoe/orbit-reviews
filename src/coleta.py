@@ -109,7 +109,7 @@ def coletar_dataset(appids: list[int], n_por_jogo: int = 1000, idioma: str = "en
     return pd.DataFrame(linhas)
 
 if __name__ == "__main__":
-    df = coletar_dataset([570, 730], n_por_jogo=200)
+    df = coletar_dataset([367520, 730], n_por_jogo=200)
     df.to_csv("data/reviews.csv", index=False, encoding="utf-8")
     print(df.head())                              # a coluna texto agora tem frases?
     print((df["texto"].str.strip() == "").sum())  # quantas reviews vazias?
