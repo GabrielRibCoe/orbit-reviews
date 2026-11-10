@@ -1,27 +1,10 @@
-import json
-import requests
+import pandas as pd
 
-entrada = {
-    "appid": 570,
-    "filter": 1,                 # 1 = mais recentes primeiro
-    "languages": ["english"],    # atenção: agora é uma LISTA, e o nome é "languages"
-    "purchase_type": 1,          # 1 = todas as compras
-    "num_per_page": 5,
-    "cursor": "*",
-}
-
-resp = requests.get(
-    "https://api.steampowered.com/IUserReviewsService/GetAppReviews/v1/",
-    params={"input_json": json.dumps(entrada)},
-    timeout=10,
-)
-print(resp.status_code)
-print(resp.url)
-dados = resp.json()
-print(dados.keys())
-print(dados["response"].keys())
-
-reviews = dados["response"]["reviews"]
-print(len(reviews))
-print(reviews[0])
-print(dados.get("cursor"))
+linhas = [
+    {"texto": "adorei", "rotulo": 1, "appid": 570},
+    {"texto": "horrível", "rotulo": 0, "appid": 570},
+]
+df = pd.DataFrame(linhas)
+print(df)
+print(df.shape)                   # (2, 3): 2 linhas, 3 colunas
+print(df["rotulo"].value_counts())  # conta quantos 1 e quantos 0
