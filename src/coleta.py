@@ -74,7 +74,7 @@ def _buscar_pagina(appid, n, idioma, cursor) -> tuple[list[dict], str]:
 
     return reviews, novo_cursor
 
-def _buscar_reviews_completo(appid: int, n, idioma: str = "english") -> list[dict]:
+def _buscar_reviews_completo(appid: int, n, idioma: str = "portuguese") -> list[dict]:
     
     todas = []
     cursor = "*"
