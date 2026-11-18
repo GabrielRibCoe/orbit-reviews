@@ -2,7 +2,6 @@
 
 Para rodar, na raiz do projeto:  streamlit run src/app.py
 """
-import base64
 import pathlib
 import sys
 
@@ -11,14 +10,14 @@ sys.path.insert(0, str(RAIZ))
 
 import streamlit as st
 
-USAR_MOCKS = True  # mude para False quando as funções reais estiverem prontas
+USAR_MOCKS = False  # True = dados falsos (para testar só a tela)
 
 if USAR_MOCKS:
     from src.mocks import analisar, buscar_jogo, buscar_reviews, prever, resumir
 else:
     from src.analise import analisar, resumir
     from src.coleta import buscar_jogo, buscar_reviews
-    from src.modelo import prever
+    from src.modelo import CAMINHO_MODELO, prever
 
 # ---------------------------------------------------------------- identidade
 ASSETS = RAIZ / "assets"
@@ -119,7 +118,7 @@ h1, h2, h3 {{ color: {ROXO_ESCURO}; font-weight: 600; letter-spacing: -.01em; }}
 
 # ---------------------------------------------------------------- tela
 st.title("Analisador de emoção de reviews de jogos")
-nome = st.text_input("Nome do jogo", placeholder="Ex.: Elden Ring")
+nome = st.text_input("Nome do jogo")
 
 if st.button("Analisar") and nome.strip():
     jogos = buscar_jogo(nome)
@@ -127,11 +126,13 @@ if st.button("Analisar") and nome.strip():
         st.warning("Nenhum jogo encontrado. Tente outro nome.")
     else:
         jogo = jogos[0]  # TODO: se houver vários resultados, deixar o usuário escolher (st.selectbox)
-        textos = buscar_reviews(jogo["appid"], n=100)
+        with st.spinner("Buscando e analisando as reviews..."):
+            textos = buscar_reviews(jogo["appid"], n=100)
         if not textos:
             st.warning("Esse jogo não tem reviews suficientes.")
         else:
-            probs = prever(textos)
+            with st.spinner("Classificando com a rede neural..."):
+                probs = prever(textos)
             est = analisar(jogo["nome"], textos, probs)
 
             st.subheader(est["jogo"])
@@ -154,9 +155,3 @@ if st.button("Analisar") and nome.strip():
                 st.markdown("**Negativas**")
                 for t in est["exemplos_negativos"]:
                     st.write(f"- {t}")
-
-st.markdown(
-    f'<div class="orbit-rodape"><img src="data:image/png;base64,{PLANETA_ROXO}" alt="">'
-    f"<span>Orbit</span></div>",
-    unsafe_allow_html=True,
-)
