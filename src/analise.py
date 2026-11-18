@@ -13,6 +13,17 @@ Formato das estatísticas (dict) que `analisar` devolve e `resumir` consome:
 """
 from collections import Counter
 
+# Palavras comuns que não dizem nada sobre o motivo da crítica (inglês, que é o idioma das reviews).
+IGNORAR = {
+    "this", "that", "with", "have", "they", "them", "their", "there", "these", "those",
+    "from", "your", "what", "when", "will", "would", "could", "should", "about", "been",
+    "were", "more", "than", "some", "only", "very", "even", "just", "also", "into",
+    "much", "many", "because", "which", "while", "where", "does", "doesnt", "didnt",
+    "dont", "cant", "wont", "isnt", "game", "games", "play", "played", "playing",
+    "like", "really", "still", "other", "after", "before", "then", "every", "never",
+    "being", "thing", "things", "time", "make", "good", "steam",
+}
+
 
 def analisar(nome_jogo: str, textos: list[str], probabilidades: list[float]) -> dict:
     """Junta textos + probabilidades da rede e calcula as estatísticas acima."""
@@ -33,7 +44,7 @@ def analisar(nome_jogo: str, textos: list[str], probabilidades: list[float]) -> 
         for w in t.lower().split():
             # Limpa pontuação simples e pega palavras com mais de 3 letras
             w_limpa = "".join(ch for ch in w if ch.isalnum())
-            if len(w_limpa) > 3:
+            if len(w_limpa) > 3 and w_limpa not in IGNORAR:
                 palavras_totais.append(w_limpa)
                 
     contador_palavras = Counter(palavras_totais)

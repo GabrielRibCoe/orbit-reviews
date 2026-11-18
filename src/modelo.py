@@ -67,7 +67,7 @@ def _construir(textos_treino):
 
     entrada = keras.Input(shape=(), dtype=tf.string)
     x = vetorizador(entrada)
-    x = layers.Embedding(VOCAB_MAX, DIM_EMBEDDING)(x)
+    x = layers.Embedding(VOCAB_MAX, DIM_EMBEDDING, mask_zero=True)(x)
     x = layers.GlobalAveragePooling1D()(x)
     x = layers.Dense(32, activation="relu")(x)
     x = layers.Dropout(0.4)(x)
@@ -145,8 +145,10 @@ def prever(textos: list[str]) -> list[float]:
     """Recebe textos e devolve, para cada um, a probabilidade (0 a 1) de ser POSITIVO."""
     if not textos:
         return []
+    from src.limpeza import limpar_texto  # mesma limpeza usada no treino
+
     modelo = carregar_modelo()
-    entrada = np.array([str(t) for t in textos], dtype=object)
+    entrada = np.array([limpar_texto(t) for t in textos], dtype=object)
     return modelo.predict(entrada, verbose=0).ravel().astype(float).tolist()
 
 

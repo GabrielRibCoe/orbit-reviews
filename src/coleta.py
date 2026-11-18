@@ -71,7 +71,6 @@ def _buscar_pagina(appid, n, idioma, cursor) -> tuple[list[dict], str]:
     resposta = dados.get("response", {})
     reviews = resposta.get("reviews", [])
     novo_cursor = resposta.get("cursor", cursor)
-    print("coleta feita:", len(reviews), "reviews, cursor:", novo_cursor)
 
     return reviews, novo_cursor
 
@@ -89,7 +88,6 @@ def _buscar_reviews_completo(appid: int, n, idioma: str = "english") -> list[dic
                 break
         cursor = novo_cursor
         time.sleep(1)  # pausa de 1 segundo entre chamadas
-        print(f"Coletadas {len(todas)} reviews até agora...")
     
     return todas[:n]
 
@@ -108,10 +106,26 @@ def coletar_dataset(appids: list[int], n_por_jogo: int = 1000, idioma: str = "en
             linhas.append({"texto": r.get("review"), "rotulo": 1 if r.get("voted_up") else 0, "appid": appid})
     return pd.DataFrame(linhas)
 
+# appids usados no dataset de treino (misture jogos bem e mal avaliados).
+JOGOS_TREINO = [
+    620, 814380, 1145350, 1145360, 1325200, 1340990, 1448440, 1771300,
+    1875580, 1938010, 2114740, 2138710, 2277560, 2288150, 2437170, 2584990,
+    2622380, 2753000, 2767030, 2784470, 2868840, 3061570, 3164330, 3681010,
+    4262460, 4656000,
+]
+
 if __name__ == "__main__":
-    df = coletar_dataset([1329880, 1056960], n_por_jogo=200)
-    df.to_csv("data/reviews.csv", index=False, encoding="utf-8")
-    print(df.head())                              # a coluna texto agora tem frases?
-    print((df["texto"].str.strip() == "").sum())  # quantas reviews vazias?
-    print(df["texto"].str.len().describe())       # tamanhos dos textos
-    print(df.groupby("appid")["rotulo"].mean())   # fração positiva por jogo              # há textos vazios/ausentes?
+    # python -m src.coleta   (demora alguns minutos por causa da pausa entre as páginas)
+    import os
+
+    caminho = "data/reviews.csv"
+    if os.path.exists(caminho):
+        resp = input(f"{caminho} já existe. Sobrescrever? (s/n) ")
+        if resp.strip().lower() != "s":
+            raise SystemExit("Coleta cancelada, o arquivo atual foi mantido.")
+
+    df = coletar_dataset(JOGOS_TREINO, n_por_jogo=1500)
+    df.to_csv(caminho, index=False, encoding="utf-8")
+    print(df.shape)
+    print(df["rotulo"].value_counts())
+    print(df.groupby("appid")["rotulo"].mean())   # fração positiva por jogo
