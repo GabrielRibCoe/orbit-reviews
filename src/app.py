@@ -2,6 +2,7 @@
 
 Para rodar, na raiz do projeto:  streamlit run src/app.py
 """
+import base64
 import pathlib
 import sys
 
